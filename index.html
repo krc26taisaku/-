@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#10231f" />
+    <meta name="description" content="遊びの野球でカウントとその日の成績を気軽に記録できるアプリ" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Sans+JP:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="icon" href="assets/baseball-evening.png" type="image/png" />
+    <link rel="stylesheet" href="styles.css?v=7" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <title>野球カウント</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true"><span></span></div>
+        <div class="brand-copy">
+          <p class="eyebrow">PLAY BALL!</p>
+          <h1>野球カウント</h1>
+        </div>
+        <button class="icon-button" id="resetGameButton" aria-label="カウントをリセット" title="カウントをリセット">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+        </button>
+      </header>
+
+      <main>
+        <section class="view is-active" id="homeView" data-view="home">
+          <div class="mini-hero">
+            <img src="assets/baseball-evening.png" alt="夕暮れの野球場とバット、ボールのイラスト" />
+            <div class="hero-shade"></div>
+            <div class="mini-hero-content">
+              <div class="date-row">
+                <div>
+                  <span id="weekdayLabel">FRIDAY</span>
+                  <strong id="displayDate">9月18日</strong>
+                </div>
+                <label class="date-picker-label" aria-label="記録日を選ぶ">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+                  <input type="date" id="datePicker" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <section class="game-console pitch-console" aria-labelledby="pitchBoardTitle">
+            <div class="pitch-summary" id="pitchBoardTitle">
+              <div><span>球数</span><strong id="totalPitches">0</strong><small>（<b id="atBatPitches">0</b>）</small></div>
+              <div><span>奪三振数</span><strong id="dayStrikeouts">0</strong></div>
+            </div>
+
+            <div class="mode-switch" role="radiogroup" aria-label="記録モード">
+              <button data-mode="inning" aria-pressed="true"><span>⚾</span><b>イニング</b><small>走者・得点あり</small></button>
+              <button data-mode="atbat" aria-pressed="false"><span>1</span><b>1打席</b><small>走者・得点なし</small></button>
+            </div>
+
+            <div class="batter-bar">
+              <div><span class="section-kicker">CURRENT BATTER</span><strong id="currentBatterName">プレイヤー1</strong></div>
+              <button class="player-manage-button" id="openPlayerDialog">選手登録 <b>＋</b></button>
+            </div>
+
+            <div class="count-panel" aria-label="現在のカウント">
+              <div class="count-control-row ball-row">
+                <div class="count-name"><strong>B</strong><small id="ballText">0 BALL</small></div>
+                <div class="count-lamps"><span class="lamp" data-count-type="balls" data-index="1"></span><span class="lamp" data-count-type="balls" data-index="2"></span><span class="lamp" data-count-type="balls" data-index="3"></span></div>
+                <button class="count-tap ball-button" data-action="ball">ボール</button>
+              </div>
+              <div class="count-control-row strike-row">
+                <div class="count-name"><strong>S</strong><small id="strikeText">0 STRIKE</small></div>
+                <div class="count-lamps"><span class="lamp" data-count-type="strikes" data-index="1"></span><span class="lamp" data-count-type="strikes" data-index="2"></span></div>
+                <button class="count-tap strike-button" data-action="strike">ストライク</button>
+              </div>
+              <div class="count-control-row out-row">
+                <div class="count-name"><strong>O</strong><small id="outText">0 OUT</small></div>
+                <div class="count-lamps"><span class="lamp" data-count-type="outs" data-index="1"></span><span class="lamp" data-count-type="outs" data-index="2"></span></div>
+                <button class="count-tap foul-button" data-action="foul">ファウル</button>
+              </div>
+            </div>
+
+            <div class="hit-results" aria-label="安打結果">
+              <button class="result-chip" data-result="single">単打</button>
+              <button class="result-chip" data-result="double">二塁打</button>
+              <button class="result-chip" data-result="triple">三塁打</button>
+              <button class="result-chip home-run" data-result="homeRun">本塁打</button>
+            </div>
+            <div class="out-results" aria-label="アウト結果">
+              <button class="result-chip strikeout" data-result="strikeout"><span>K</span>三振</button>
+              <button class="result-chip" id="doublePlayButton" data-result="doublePlay">併殺</button>
+              <button class="result-chip" data-result="plateOut">アウト</button>
+            </div>
+
+            <div class="batter-action-row">
+              <button class="switch-batter-button" id="switchBatterButton"><span>↻</span> 打者切り替え</button>
+              <button class="utility-action-button undo" id="undoPitchButton"><span>↶</span> 1球戻す</button>
+              <button class="utility-action-button reset" id="resetPlayerStatsButton"><span>×</span> 成績リセット</button>
+            </div>
+
+            <div class="today-stats player-today-stats" aria-label="現在の打者の今日の成績">
+              <div><strong id="statPa">0</strong><span>打席</span></div>
+              <div><strong id="statHits">0</strong><span>安打</span></div>
+              <div><strong id="statHomeRuns">0</strong><span>本塁打</span></div>
+              <div><strong id="statWalks">0</strong><span>四球</span></div>
+              <div><strong id="playerStrikeouts">0</strong><span>三振</span></div>
+            </div>
+
+            <div class="rate-stats" aria-label="現在の打者の指標">
+              <div><span>打率</span><strong id="playerAverage">.000</strong></div>
+              <div><span>OPS</span><strong id="playerOps">.000</strong></div>
+              <div><span>三振率</span><strong id="playerStrikeoutRate">0.0%</strong></div>
+            </div>
+
+            <div class="runner-compact" id="runnerPanel">
+              <div class="runner-compact-head"><span><b>ランナー</b><small id="runnerModeHint">塁をタップして修正</small></span><em id="inningRuns">0得点</em></div>
+              <div class="diamond-wrap" aria-label="ランナーの塁状況">
+                <div class="infield-lines" aria-hidden="true"></div>
+                <button class="base second-base" data-base="second" aria-pressed="false"><span>2</span><small>二塁</small></button>
+                <button class="base third-base" data-base="third" aria-pressed="false"><span>3</span><small>三塁</small></button>
+                <button class="base first-base" data-base="first" aria-pressed="false"><span>1</span><small>一塁</small></button>
+                <div class="base home-base is-home" aria-hidden="true"><span>H</span><small>本塁</small></div>
+                <div class="pitcher-dot" aria-hidden="true"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="recordView" data-view="record" hidden>
+          <div class="record-hero">
+            <span class="section-kicker light">MY RECORD</span>
+            <h2>積み重ねた記録</h2>
+            <p>遊んだ日の調子と成績を、あとから振り返れます。</p>
+            <div class="career-grid">
+              <div><span>通算打率</span><strong id="careerAverage">.000</strong></div>
+              <div><span>記録日数</span><strong id="careerDays">0</strong><small>日</small></div>
+              <div><span>通算安打</span><strong id="careerHits">0</strong><small>本</small></div>
+            </div>
+          </div>
+
+          <section class="split-card player-record-card" aria-labelledby="splitTitle">
+            <div class="section-heading compact">
+              <div>
+                <span class="section-kicker">PLAYER STATS</span>
+                <h2 id="splitTitle">選手別成績</h2>
+              </div>
+              <select id="recordPlayerSelect" aria-label="選手を選択"></select>
+            </div>
+            <div class="player-record-grid">
+              <div><span>打席</span><strong id="careerPa">0</strong></div>
+              <div><span>単打</span><strong id="careerSingles">0</strong></div>
+              <div><span>二塁打</span><strong id="careerDoubles">0</strong></div>
+              <div><span>三塁打</span><strong id="careerTriples">0</strong></div>
+              <div><span>本塁打</span><strong id="careerHomeRuns">0</strong></div>
+              <div><span>四球</span><strong id="careerWalks">0</strong></div>
+              <div><span>三振</span><strong id="careerStrikeouts">0</strong></div>
+              <div><span>併殺</span><strong id="careerDoublePlays">0</strong></div>
+            </div>
+          </section>
+
+          <section class="history-section" aria-labelledby="historyTitle">
+            <div class="section-heading">
+              <div>
+                <span class="section-kicker">HISTORY</span>
+                <h2 id="historyTitle">日ごとの記録</h2>
+              </div>
+            </div>
+            <div class="history-list" id="historyList"></div>
+            <div class="empty-state" id="emptyState">
+              <div class="empty-ball" aria-hidden="true"></div>
+              <h3>まだ記録がありません</h3>
+              <p>ホームから最初のカウントを記録してみましょう。</p>
+            </div>
+          </section>
+
+          <section class="note-card" aria-labelledby="conditionTitle">
+            <div class="section-heading compact">
+              <div>
+                <span class="section-kicker">CONDITION</span>
+                <h2 id="conditionTitle">今日の調子</h2>
+              </div>
+              <span class="saved-label" id="savedLabel">自動保存</span>
+            </div>
+            <div class="mood-row" role="radiogroup" aria-label="今日の調子">
+              <button data-mood="great" aria-label="絶好調">🔥<span>絶好調</span></button>
+              <button data-mood="good" aria-label="好調">😊<span>好調</span></button>
+              <button data-mood="normal" aria-label="普通">🙂<span>普通</span></button>
+              <button data-mood="tired" aria-label="いまいち">😵‍💫<span>いまいち</span></button>
+            </div>
+            <label class="memo-field">
+              <span>ひとことメモ</span>
+              <textarea id="noteInput" rows="3" maxlength="160" placeholder="今日よかったこと、次に意識したいこと…"></textarea>
+              <small><span id="noteCount">0</span>/160</small>
+            </label>
+          </section>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="メインメニュー">
+        <button class="nav-item is-active" data-nav="home" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+          <span>ホーム</span>
+        </button>
+        <button class="nav-item" data-nav="record">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>
+          <span>記録</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <dialog id="resetDialog" class="confirm-dialog">
+      <form method="dialog">
+        <div class="dialog-icon">↻</div>
+        <h2>カウントをリセット？</h2>
+        <p>B・S・Oと現在打席の球数を0に戻します。その日の成績は消えません。</p>
+        <div class="dialog-actions">
+          <button value="cancel">やめる</button>
+          <button value="confirm" class="danger-button">リセット</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="playerDialog" class="player-dialog">
+      <form method="dialog">
+        <div class="player-dialog-head">
+          <div><span class="section-kicker">ROSTER</span><h2>選手を登録</h2></div>
+          <button value="close" class="dialog-close" aria-label="閉じる">×</button>
+        </div>
+        <div class="player-add-row">
+          <input id="playerNameInput" maxlength="16" placeholder="選手名を入力" autocomplete="off" />
+          <button type="button" id="addPlayerButton">追加</button>
+        </div>
+        <p class="player-dialog-help">名前をタップすると現在の打者に設定できます。</p>
+        <div class="player-list" id="playerList"></div>
+      </form>
+    </dialog>
+    <dialog id="playerResetDialog" class="confirm-dialog">
+      <form method="dialog">
+        <div class="dialog-icon">×</div>
+        <h2>この打者の成績をリセット？</h2>
+        <p><strong id="resetPlayerName">現在の打者</strong>の今日の成績と球数だけを削除します。ほかの選手の成績は残ります。</p>
+        <div class="dialog-actions">
+          <button value="cancel">やめる</button>
+          <button value="confirm" class="danger-button">リセット</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="app.js?v=7"></script>
+  </body>
+</html>

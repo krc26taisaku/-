@@ -1,0 +1,11 @@
+{
+  "name": "野球カウント",
+  "short_name": "野球カウント",
+  "description": "遊びで使えるアウトカウント、成績記録",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4efe5",
+  "theme_color": "#10231f",
+  "lang": "ja",
+  "orientation": "portrait-primary"
+}
